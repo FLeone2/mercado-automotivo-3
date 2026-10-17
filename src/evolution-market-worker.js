@@ -148,12 +148,17 @@
   }
   // Optional catalog: sparse exact triples, never products of marginal totals.
   const CATALOG_BUCKET_LIMIT=100000, CATALOG_TIMELINE_LIMIT=250000;
-  function createCatalogExtras(limit=CATALOG_BUCKET_LIMIT){return {limit,segmentFields:new Set(),joints:{segmentBrandModel:new Map(),modelChannelRegion:new Map()},overflow:new Set(),ufByMonth:new Map()};}
+  function createCatalogExtras(limit=CATALOG_BUCKET_LIMIT){return {limit,segmentFields:new Set(),joints:Object.fromEntries(['segmentBrandModel','modelChannelRegion','geoBrand','segmentModelMonth','ufSegmentBrand','technologyUFMonth','geoSegment'].map(k=>[k,new Map()])),overflow:new Set(),ufByMonth:new Map()};}
   function collectCatalogRow(extra,count,date,value,segmentField){
    extra.segmentFields.add(segmentField);
    const add=(name,values)=>{if(extra.overflow.has(name))return;const map=extra.joints[name],key=JSON.stringify(values);if(!map.has(key)&&map.size>=extra.limit){map.clear();extra.overflow.add(name);return;}map.set(key,(map.get(key)??0)+count);};
    add('segmentBrandModel',[segmentField,value(segmentField),value('marca'),value('modelo')]);
    add('modelChannelRegion',[value('modelo'),value('tipo_venda'),value('regiao')]);
+   add('geoBrand',[value('uf'),value('municipio'),value('marca')]);
+   add('segmentModelMonth',[date.slice(0,7),value('bd_classe'),value('marca'),value('modelo')]);
+   add('ufSegmentBrand',[value('uf'),value('bd_classe'),value('marca')]);
+   add('technologyUFMonth',[date.slice(0,7),value('uf'),value('propulsao'),value('marca')]);
+   add('geoSegment',[value('uf'),value('municipio'),value('bd_segmento'),value('bd_carroceria')]);
    const key=JSON.stringify([date.slice(0,7),value('uf')]);extra.ufByMonth.set(key,(extra.ufByMonth.get(key)??0)+count);
   }
   function finishCatalog(acc,extra,range,coverage,{complete=true,missingMonths=[],incompleteMonths=[],unavailableMonths=[]}={}){
@@ -245,7 +250,7 @@
    }
    if(value.acc.interactiveMonthlyGroups&&!INTERACTIVE_DIMS.every(dim=>countMap(value.acc.interactiveMonthlyGroups[dim])))return false;
    if(membership&&!RANKING_BRAND_DIMENSIONS.every(dim=>value.membership?.[dim] instanceof Map&&[...value.membership[dim]].every(([key,map])=>typeof key==='string'&&countMap(map))))return false;
-   if(extra&&(!value.extra||value.extra.limit!==extra.limit||!(value.extra.segmentFields instanceof Set)||!(value.extra.overflow instanceof Set)||!countMap(value.extra.ufByMonth)||!['segmentBrandModel','modelChannelRegion'].every(name=>countMap(value.extra.joints?.[name]))))return false;
+   if(extra&&(!value.extra||value.extra.limit!==extra.limit||!(value.extra.segmentFields instanceof Set)||!(value.extra.overflow instanceof Set)||!countMap(value.extra.ufByMonth)||!['segmentBrandModel','modelChannelRegion','geoBrand','segmentModelMonth','ufSegmentBrand','technologyUFMonth','geoSegment'].every(name=>countMap(value.extra.joints?.[name]))))return false;
    return true;
   }
   function createResultCache({maxBytes=8*1024*1024,maxEntries=4}={}){
@@ -419,7 +424,7 @@
        const clipped={start:selectedRange.start>cube.month+'-01'?selectedRange.start:cube.month+'-01',end:selectedRange.end<monthEnd(cube.month)?selectedRange.end:monthEnd(cube.month)};
        const {membership,catalogExtra,...projection}=collectOptions;
        const nonDate={...selected};delete nonDate.date;
-       const key=JSON.stringify([namespace,loadMeta.cubePath,loadMeta.sha256??'',cube.month,canonicalFilterKey(nonDate),clipped,projection,Boolean(membership),catalogExtra?catalogExtra.limit:null]);
+       const key=JSON.stringify([namespace,loadMeta.cubePath,loadMeta.sha256??'',cube.month,canonicalFilterKey(nonDate),clipped,projection,Boolean(membership),catalogExtra?['v3-joints-1',catalogExtra.limit]:null]);
        let contribution=aggregateCache.get(key);
        if(!contribution&&aggregateStore){try{contribution=await aggregateStore.get(key);if(!validMonthlyContribution(contribution,membership,catalogExtra))contribution=null;if(contribution)aggregateCache.set(key,contribution);}catch{}}
        cancelled(activeController.signal,generation!==token);

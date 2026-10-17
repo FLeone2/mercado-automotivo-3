@@ -9,10 +9,12 @@ function rankingControlsValid(value){
 
 // Identity-based colors never depend on selection order, view, period or rank.
 function rankingBrandColor(brand){
- if(String(brand).toUpperCase()==='MITSUBISHI')return 'var(--mitsubishi-color)';
- const fixed={FIAT:'#ad6f00',VOLKSWAGEN:'#287dcc',CHEVROLET:'#8b5bd6',TOYOTA:'#008f82',HYUNDAI:'#d85899',RENAULT:'#718a00',JEEP:'#b4673c',HONDA:'#6084a5',NISSAN:'#a947ba',BYD:'#168caf',GWM:'#7270d4',FORD:'#926d23','CAOA CHERY':'#4a9861',CITROEN:'#a65b78',PEUGEOT:'#7b7991',RAM:'#38867b'};if(fixed[brand])return fixed[brand];
- let h=2166136261;for(const c of String(brand))h=Math.imul(h^c.codePointAt(0),16777619)>>>0;
- return 'hsl('+((h%300000)/1000+30)+' 65% 48%)';
+ const name=String(brand).trim().toUpperCase();if(name==='MITSUBISHI')return 'var(--mitsubishi-color)';
+ const fixed={FIAT:'var(--v3-steel)',VW:'var(--v3-amber)',VOLKSWAGEN:'var(--v3-amber)',BYD:'var(--v3-sea)',CHEVROLET:'#8c75a6',GM:'var(--v3-lavender)',TOYOTA:'var(--v3-olive)',HYUNDAI:'var(--v3-plum)'};
+ if(fixed[name])return fixed[name];if(['OUTRAS','OUTROS','DEMAIS MARCAS'].includes(name))return 'var(--v3-other)';
+ let hash=2166136261;for(const c of name)hash=Math.imul(hash^c.codePointAt(0),16777619)>>>0;
+ // A stable categorical palette, with no additional red categories.
+ return 'hsl('+(40+(hash%260000)/1000)+' 35% var(--v3-brand-lightness,48%))';
 }
 function rankingHighlights(counts,total,selected){return selected.filter(b=>(counts?.[b]??0)>0).map(brand=>({brand,count:counts[brand],color:rankingBrandColor(brand),exclusive:counts[brand]===total}));}
 function rankingHighlightColor(parts){return parts?.find(p=>p.exclusive)?.color;}

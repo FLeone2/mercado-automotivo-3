@@ -1,6 +1,12 @@
+# Mercado Automotivo 3
+
+Nova versão do painel, com navegação simplificada, análises comerciais, mapas nacionais e apêndice técnico. Consulte [o escopo, as definições e os limites da versão 3](docs/VERSAO_3.md).
+
+Build principal: `python scripts/build-v3.py`. Os dados revisados originais são preservados.
+
 # Mercado automotivo
 
-Static dashboard published by the existing GitHub → Cloudflare Pages integration.
+Static dashboard copied from the original project. Hosting for this new repository must be connected separately; copying the code does not transfer the original Cloudflare Pages integration.
 `index.html` contains the reviewed snapshot, bundled runtime and authored application.
 Monthly reviewed data remain in `data/`; ranking changes do not modify those files.
 

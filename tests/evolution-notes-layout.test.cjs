@@ -5,7 +5,7 @@ test('Evolution owns a scoped wrapper including its detailed charts',()=>{
  const context={React:{useState:v=>[v,()=>{}]},jsxRuntime:{jsx,jsxs:jsx,Fragment:'fragment'},dataApp:{Section:'section',SegmentedControl:'tabs'},MarketChart:'chart',MarketTable:'table',LegacyHistoryView:'legacy',mitsubishiColors:()=>({}),number:String,percent:String};
  vm.runInNewContext(source+';globalThis.render=HistoryView;',context);
  const market={monthly:[],brandsByMonth:[],groups:{marca:[]},bodyByMonth:[]};
- const node=context.render({model:{evolution:{market,mitsubishi:{total:0,bodyByMonth:[]}}},view:'executive'});
+ const node=context.render({model:{evolution:{market,mitsubishi:{total:0,bodyByMonth:[]}}},view:'detail'});
  assert.equal(node.type,'div');assert.equal(node.props.className,'ev-history-view');
  const legacy=node.props.children.at(-1);assert.equal(legacy.props.className,'ev-legacy');assert.equal(legacy.props.children[1].type,'legacy');
 });

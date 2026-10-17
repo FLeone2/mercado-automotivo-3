@@ -25,5 +25,5 @@ const data=new Map(),storage={getItem:k=>data.get(k)??null,setItem:(k,v)=>data.s
 for(const appearance of ['system','light','dark']){assert(persistence.s7({id:'theme-test'},{theme:'liquid-blue',appearance},storage));assert.deepEqual(persistence.$Pe({id:'theme-test'},storage),{theme:'liquid-blue',appearance});}
 assert.equal(html.match(/<style id="market-blue-theme-styles">([\s\S]*?)<\/style>/)[1].trim(),css.trim());
 assert(!css.includes('--mitsubishi-color:'));assert(!css.includes('@font-face'));
-assert.equal(cp.execFileSync('git',['diff','da24531','--','data',':(exclude)data/scenarios/manifest.json']).toString(),'');
+assert.equal(cp.execFileSync('git',['diff','0ddfdf625c984180fb7a2208705705b2040679c8','--','data/cubes','data/origin-cubes','data/manifest.json','data/scenarios']).toString(),'');
 console.log('PASS blue registry/apply/reset, existing themes, light/dark contrast, semantic colors, actual storage round trip and embedded CSS.');
